@@ -1,0 +1,17 @@
+# Logs
+*.log
+
+# PowerShell module output / build artefacts
+output/
+*.nupkg
+
+# Test results
+testResults.xml
+coverage.xml
+
+# OS / editor cruft
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
