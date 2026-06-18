@@ -74,12 +74,23 @@ Block-EdgeReinstall            # optional
 ├── Uninstall-Edge.bat            # Double-click launcher
 ├── src/EdgeUninstaller/          # The PowerShell module
 │   ├── EdgeUninstaller.psd1      #   Module manifest
-│   ├── EdgeUninstaller.psm1      #   Module loader
-│   ├── Public/                   #   Exported functions
-│   └── Private/                  #   Internal helpers
-├── docs/                         # Documentation
-├── tests/                        # Pester tests
-└── .github/workflows/            # CI (PSScriptAnalyzer lint)
+│   ├── EdgeUninstaller.psm1      #   Module loader (dot-sources every function)
+│   ├── Public/                   #   Exported functions (one per file)
+│   │   ├── Uninstall-MicrosoftEdge.ps1
+│   │   └── Block-EdgeReinstall.ps1
+│   └── Private/                  #   Internal helpers (one per file)
+│       ├── Find-EdgeInstaller.ps1
+│       ├── Stop-EdgeProcess.ps1
+│       ├── Remove-EdgeResidue.ps1
+│       ├── Assert-Administrator.ps1
+│       └── Write-EdgeLog.ps1
+├── docs/                         # Documentation (installation, usage, FAQ, …)
+├── tests/                        # Pester v5 tests
+├── .github/workflows/ci.yml      # CI: PSScriptAnalyzer lint + Pester tests
+├── PSScriptAnalyzerSettings.psd1 # Shared lint rule set
+├── CHANGELOG.md                  # Keep a Changelog history
+├── CONTRIBUTING.md               # Contributor guide
+└── LICENSE                       # MIT
 ```
 
 ## ⚠️ Disclaimer

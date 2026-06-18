@@ -36,6 +36,15 @@ Block-EdgeReinstall -Revert
 
 Yes. Download it again from Microsoft's official Edge website at any time.
 
+## What exactly does the tool remove?
+
+The browser itself is removed by Microsoft's own `setup.exe --uninstall`. The
+optional residue cleanup then deletes the leftover `Microsoft\Edge` program
+folders, the per-user `AppData\Local\Microsoft\Edge` data for **every** user
+profile, and the `Microsoft Edge.lnk` desktop shortcuts. Pass
+`-SkipResidueCleanup` to keep those files. The **Edge WebView2 runtime** is left
+untouched.
+
 ## Does this work on Windows 10 and Windows 11?
 
 Yes, on both, with Windows PowerShell 5.1 or PowerShell 7+.

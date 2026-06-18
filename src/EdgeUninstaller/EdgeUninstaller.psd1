@@ -29,6 +29,7 @@
                 'Remove', 'Debloat', 'PowerShell'
             )
             LicenseUri   = 'https://opensource.org/licenses/MIT'
+            ProjectUri   = 'https://github.com/maxionice/remove-microsoft-edge'
             ReleaseNotes = 'Initial release: modular uninstall and reinstall-block functions.'
         }
     }

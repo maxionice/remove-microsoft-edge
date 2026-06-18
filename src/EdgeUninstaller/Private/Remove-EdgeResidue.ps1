@@ -14,12 +14,20 @@ function Remove-EdgeResidue {
     [CmdletBinding(SupportsShouldProcess)]
     param()
 
-    # Leftover program and user-data directories.
-    $folders = @(
-        Join-Path ${env:ProgramFiles(x86)} 'Microsoft\Edge'
-        Join-Path $env:ProgramFiles        'Microsoft\Edge'
-        Join-Path $env:LOCALAPPDATA        'Microsoft\Edge'
-    )
+    # Leftover machine-wide program directories.
+    $folders = [System.Collections.Generic.List[string]]::new()
+    $folders.Add((Join-Path ${env:ProgramFiles(x86)} 'Microsoft\Edge'))
+    $folders.Add((Join-Path $env:ProgramFiles        'Microsoft\Edge'))
+
+    # Per-user data lives under each profile's LocalAppData. The script runs
+    # elevated, so $env:LOCALAPPDATA is often the admin profile rather than the
+    # signed-in user's. Enumerate every profile so no user's data is missed.
+    $usersRoot = Join-Path $env:SystemDrive 'Users'
+    if (Test-Path -LiteralPath $usersRoot) {
+        foreach ($userProfile in Get-ChildItem -LiteralPath $usersRoot -Directory -ErrorAction SilentlyContinue) {
+            $folders.Add((Join-Path $userProfile.FullName 'AppData\Local\Microsoft\Edge'))
+        }
+    }
 
     foreach ($folder in $folders) {
         if (-not (Test-Path -LiteralPath $folder)) { continue }
@@ -30,9 +38,18 @@ function Remove-EdgeResidue {
         }
     }
 
-    # Public desktop shortcut.
-    $shortcut = Join-Path $env:PUBLIC 'Desktop\Microsoft Edge.lnk'
-    if (Test-Path -LiteralPath $shortcut) {
+    # Desktop shortcuts (public desktop plus each user's own desktop).
+    $shortcuts = [System.Collections.Generic.List[string]]::new()
+    $shortcuts.Add((Join-Path $env:PUBLIC 'Desktop\Microsoft Edge.lnk'))
+    if (Test-Path -LiteralPath $usersRoot) {
+        foreach ($userProfile in Get-ChildItem -LiteralPath $usersRoot -Directory -ErrorAction SilentlyContinue) {
+            $shortcuts.Add((Join-Path $userProfile.FullName 'Desktop\Microsoft Edge.lnk'))
+        }
+    }
+
+    foreach ($shortcut in $shortcuts) {
+        if (-not (Test-Path -LiteralPath $shortcut)) { continue }
+
         if ($PSCmdlet.ShouldProcess($shortcut, 'Remove shortcut')) {
             Remove-Item -LiteralPath $shortcut -Force -ErrorAction SilentlyContinue
             Write-Verbose "Removed shortcut: $shortcut"

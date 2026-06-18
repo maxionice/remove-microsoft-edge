@@ -1,7 +1,7 @@
 name: CI
 
-# Lint the PowerShell source and run the Pester smoke tests on every push and
-# pull request.
+# Lint the whole repository with PSScriptAnalyzer and run the Pester suite on
+# every push and pull request. The lint step fails the build on any finding.
 on:
   push:
     branches: [ main ]
@@ -19,11 +19,17 @@ jobs:
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module PSScriptAnalyzer -Scope CurrentUser -Force
-          Install-Module Pester -Scope CurrentUser -Force
+          Install-Module Pester -Scope CurrentUser -RequiredVersion 5.6.1 -Force
 
       - name: Run PSScriptAnalyzer
         shell: pwsh
-        run: Invoke-ScriptAnalyzer -Path .\src -Recurse -Severity Warning,Error
+        run: |
+          $results = Invoke-ScriptAnalyzer -Path . -Recurse `
+              -Settings .\PSScriptAnalyzerSettings.psd1
+          $results | Format-Table -AutoSize
+          if ($results) {
+              throw "PSScriptAnalyzer reported $($results.Count) issue(s)."
+          }
 
       - name: Run Pester tests
         shell: pwsh

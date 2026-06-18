@@ -42,8 +42,11 @@ function Uninstall-MicrosoftEdge {
         throw 'Please run this command from an elevated PowerShell session.'
     }
 
-    # 2. Honour -Force by short-circuiting the ShouldProcess prompt.
-    if (-not ($Force -or $PSCmdlet.ShouldProcess('Microsoft Edge', 'Uninstall'))) {
+    # 2. Honour -Force by suppressing the confirmation prompt, but still respect
+    #    -WhatIf: ShouldProcess returns $false under -WhatIf even with -Force, so
+    #    a preview can never trigger the real uninstall below.
+    if ($Force) { $ConfirmPreference = 'None' }
+    if (-not $PSCmdlet.ShouldProcess('Microsoft Edge', 'Uninstall')) {
         Write-EdgeLog 'Uninstall cancelled by user.' -Level Warning
         return $false
     }
@@ -69,7 +72,15 @@ function Uninstall-MicrosoftEdge {
         '--force-uninstall'
     )
     $process = Start-Process -FilePath $setup -ArgumentList $arguments -Wait -PassThru
-    Write-EdgeLog "Installer exited with code $($process.ExitCode)." -Level Info
+    $exitCode = $process.ExitCode
+    Write-EdgeLog "Installer exited with code $exitCode." -Level Info
+
+    # A non-zero exit code means the installer did not remove Edge. Report the
+    # failure instead of pretending the uninstall succeeded.
+    if ($exitCode -ne 0) {
+        Write-EdgeLog "Uninstall failed: setup.exe returned exit code $exitCode." -Level Error
+        return $false
+    }
 
     # 6. Optional cleanup of residual files and shortcuts.
     if (-not $SkipResidueCleanup) {
