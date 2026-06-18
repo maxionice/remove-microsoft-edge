@@ -36,7 +36,8 @@ function Uninstall-MicrosoftEdge {
     Write-EdgeLog 'Microsoft Edge uninstaller starting...' -Level Info
 
     # 1. Elevation is mandatory; bail out early with a clear message.
-    if (-not (Assert-Administrator)) {
+    #    Skip the check under -WhatIf so a preview can run without elevation.
+    if (-not $WhatIfPreference -and -not (Assert-Administrator)) {
         Write-EdgeLog 'Administrator privileges are required.' -Level Error
         throw 'Please run this command from an elevated PowerShell session.'
     }
