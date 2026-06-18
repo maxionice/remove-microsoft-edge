@@ -11,8 +11,8 @@ This guide explains how to get **Edge Uninstaller** onto your machine.
 ## Option 2 — Clone with Git
 
 ```powershell
-git clone https://github.com/<your-user>/edge-uninstaller.git
-cd edge-uninstaller
+git clone https://github.com/<your-user>/remove-microsoft-edge.git
+cd remove-microsoft-edge
 ```
 
 ## Execution policy
